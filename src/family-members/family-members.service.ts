@@ -2,6 +2,7 @@ import { ConflictException, Injectable, NotFoundException } from '@nestjs/common
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { FamilyMemberStatus } from '../common/enums/family-member-status.enum';
+import { FamiliesService } from '../families/families.service';
 import { CreateFamilyMemberDto } from './dto/create-family-member.dto';
 import { UpdateFamilyMemberDto } from './dto/update-family-member.dto';
 import { FamilyMember } from './entities/family-member.entity';
@@ -11,11 +12,13 @@ export class FamilyMembersService {
     constructor(
         @InjectRepository(FamilyMember)
         private readonly familyMembersRepository: Repository<FamilyMember>,
+        private readonly familiesService: FamiliesService,
     ) {}
 
     async create(
         createFamilyMemberDto: CreateFamilyMemberDto,
     ): Promise<FamilyMember> {
+        await this.familiesService.ensureExists(createFamilyMemberDto.familyId);
         await this.ensureIdentityUserIsAvailableInFamily(
             createFamilyMemberDto.familyId,
             createFamilyMemberDto.identityUserId,
@@ -23,8 +26,7 @@ export class FamilyMembersService {
 
         const familyMember = this.familyMembersRepository.create({
             ...createFamilyMemberDto,
-            status:
-                createFamilyMemberDto.status ?? FamilyMemberStatus.ACTIVE,
+            status: createFamilyMemberDto.status ?? FamilyMemberStatus.ACTIVE,
         });
 
         return this.familyMembersRepository.save(familyMember);
@@ -32,6 +34,7 @@ export class FamilyMembersService {
 
     findAll(): Promise<FamilyMember[]> {
         return this.familyMembersRepository.find({
+            relations: { family: true },
             order: { displayName: 'ASC' },
         });
     }
@@ -39,6 +42,7 @@ export class FamilyMembersService {
     async findOne(id: string): Promise<FamilyMember> {
         const familyMember = await this.familyMembersRepository.findOne({
             where: { id },
+            relations: { family: true },
         });
 
         if (!familyMember) {
@@ -50,6 +54,14 @@ export class FamilyMembersService {
         return familyMember;
     }
 
+    async findByIdentityUserId(identityUserId: string): Promise<FamilyMember[]> {
+        return this.familyMembersRepository.find({
+            where: { identityUserId, status: FamilyMemberStatus.ACTIVE },
+            relations: { family: true },
+            order: { displayName: 'ASC' },
+        });
+    }
+
     async update(
         id: string,
         updateFamilyMemberDto: UpdateFamilyMemberDto,
@@ -58,6 +70,10 @@ export class FamilyMembersService {
         const nextFamilyId = updateFamilyMemberDto.familyId ?? familyMember.familyId;
         const nextIdentityUserId =
             updateFamilyMemberDto.identityUserId ?? familyMember.identityUserId;
+
+        if (updateFamilyMemberDto.familyId) {
+            await this.familiesService.ensureExists(updateFamilyMemberDto.familyId);
+        }
 
         if (
             nextFamilyId !== familyMember.familyId ||
@@ -80,6 +96,18 @@ export class FamilyMembersService {
         familyMember.status = FamilyMemberStatus.INACTIVE;
 
         return this.familyMembersRepository.save(familyMember);
+    }
+
+    async ensureActiveInFamily(id: string, familyId: string): Promise<void> {
+        const exists = await this.familyMembersRepository.exists({
+            where: { id, familyId, status: FamilyMemberStatus.ACTIVE },
+        });
+
+        if (!exists) {
+            throw new NotFoundException(
+                `Family member with id ${id} was not found in family ${familyId}`,
+            );
+        }
     }
 
     private async ensureIdentityUserIsAvailableInFamily(

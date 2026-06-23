@@ -27,10 +27,11 @@ export class TaskRotationsService {
         taskId: string,
         setTaskRotationDto: SetTaskRotationDto,
     ): Promise<TaskRotationMember[]> {
-        await this.ensureTaskExists(taskId);
+        const task = await this.ensureTaskExists(taskId);
         this.ensureUniqueMembers(setTaskRotationDto);
         this.ensureUniquePositions(setTaskRotationDto);
-        await this.ensureFamilyMembersExist(
+        await this.ensureFamilyMembersExistInFamily(
+            task.familyId,
             setTaskRotationDto.members.map((member) => member.familyMemberId),
         );
 
@@ -81,20 +82,24 @@ export class TaskRotationsService {
         }
     }
 
-    private async ensureTaskExists(taskId: string): Promise<void> {
-        const exists = await this.tasksRepository.exists({ where: { id: taskId } });
+    private async ensureTaskExists(taskId: string): Promise<Task> {
+        const task = await this.tasksRepository.findOne({ where: { id: taskId } });
 
-        if (!exists) {
+        if (!task) {
             throw new NotFoundException(`Task with id ${taskId} was not found`);
         }
+
+        return task;
     }
 
-    private async ensureFamilyMembersExist(
+    private async ensureFamilyMembersExistInFamily(
+        familyId: string,
         familyMemberIds: string[],
     ): Promise<void> {
         const familyMembers = await this.familyMembersRepository.find({
             where: {
                 id: In(familyMemberIds),
+                familyId,
                 status: FamilyMemberStatus.ACTIVE,
             },
             select: { id: true },
@@ -108,7 +113,7 @@ export class TaskRotationsService {
 
         if (missingFamilyMemberIds.length > 0) {
             throw new NotFoundException(
-                `Family members were not found or are inactive: ${missingFamilyMemberIds.join(', ')}`,
+                `Family members were not found, inactive, or outside family ${familyId}: ${missingFamilyMemberIds.join(', ')}`,
             );
         }
     }

@@ -7,15 +7,14 @@ import {
     ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
-    UpdateDateColumn,
 } from 'typeorm';
 import { TaskAssignmentStatus } from '../../common/enums/task-assignment-status.enum';
 import { FamilyMember } from '../../family-members/entities/family-member.entity';
+import { TaskHistory } from '../../task-history/entities/task-history.entity';
 import { Task } from '../../tasks/entities/task.entity';
-import { TaskAssignmentLog } from './task-assignment-log.entity';
 
 @Entity('task_assignments')
-@Index(['taskId', 'scheduledFor'], { unique: true })
+@Index(['taskId', 'familyMemberId', 'startDate'], { unique: true })
 export class TaskAssignment {
     @PrimaryGeneratedColumn('uuid')
     id!: string;
@@ -30,18 +29,21 @@ export class TaskAssignment {
     @JoinColumn({ name: 'task_id' })
     task!: Task;
 
-    @Column({ name: 'assigned_family_member_id', type: 'varchar', length: 36 })
-    assignedFamilyMemberId!: string;
+    @Column({ name: 'family_member_id', type: 'varchar', length: 36 })
+    familyMemberId!: string;
 
     @ManyToOne(() => FamilyMember, (familyMember) => familyMember.assignments, {
         nullable: false,
         onDelete: 'RESTRICT',
     })
-    @JoinColumn({ name: 'assigned_family_member_id' })
-    assignedFamilyMember!: FamilyMember;
+    @JoinColumn({ name: 'family_member_id' })
+    familyMember!: FamilyMember;
 
-    @Column({ name: 'scheduled_for', type: 'date' })
-    scheduledFor!: string;
+    @Column({ name: 'start_date', type: 'date' })
+    startDate!: string;
+
+    @Column({ name: 'end_date', type: 'date' })
+    endDate!: string;
 
     @Column({
         type: 'enum',
@@ -53,15 +55,9 @@ export class TaskAssignment {
     @Column({ name: 'completed_at', type: 'timestamp', nullable: true })
     completedAt!: Date | null;
 
-    @Column({ type: 'text', nullable: true })
-    notes!: string | null;
-
-    @OneToMany(() => TaskAssignmentLog, (log) => log.assignment)
-    logs!: TaskAssignmentLog[];
+    @OneToMany(() => TaskHistory, (history) => history.taskAssignment)
+    historyEntries!: TaskHistory[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt!: Date;
-
-    @UpdateDateColumn({ name: 'updated_at' })
-    updatedAt!: Date;
 }

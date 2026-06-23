@@ -1,68 +1,79 @@
-﻿import {
-  Column,
-  CreateDateColumn,
-  Entity,
-  JoinColumn,
-  ManyToOne,
-  OneToMany,
-  PrimaryGeneratedColumn,
-  UpdateDateColumn,
+import {
+    Column,
+    CreateDateColumn,
+    Entity,
+    JoinColumn,
+    ManyToOne,
+    OneToMany,
+    PrimaryGeneratedColumn,
+    UpdateDateColumn,
 } from 'typeorm';
 import { DayOfWeek } from '../../common/enums/day-of-week.enum';
 import { TaskRecurrenceType } from '../../common/enums/task-recurrence-type.enum';
+import { Family } from '../../families/entities/family.entity';
 import { TaskAssignment } from '../../task-assignments/entities/task-assignment.entity';
 import { TaskCategory } from '../../task-categories/entities/task-category.entity';
 import { TaskRotationMember } from '../../task-rotations/entities/task-rotation-member.entity';
 
 @Entity('tasks')
 export class Task {
-  @PrimaryGeneratedColumn('uuid')
-  id!: string;
+    @PrimaryGeneratedColumn('uuid')
+    id!: string;
 
-  @Column({ name: 'category_id', type: 'varchar', length: 36, nullable: true })
-  categoryId!: string | null;
+    @Column({ name: 'family_id', type: 'varchar', length: 36 })
+    familyId!: string;
 
-  @ManyToOne(() => TaskCategory, (category) => category.tasks, {
-    nullable: true,
-    onDelete: 'SET NULL',
-  })
-  @JoinColumn({ name: 'category_id' })
-  category!: TaskCategory | null;
+    @ManyToOne(() => Family, (family) => family.tasks, {
+        nullable: false,
+        onDelete: 'CASCADE',
+    })
+    @JoinColumn({ name: 'family_id' })
+    family!: Family;
 
-  @Column({ type: 'varchar', length: 160 })
-  title!: string;
+    @Column({ name: 'category_id', type: 'varchar', length: 36, nullable: true })
+    categoryId!: string | null;
 
-  @Column({ type: 'text', nullable: true })
-  description!: string | null;
+    @ManyToOne(() => TaskCategory, (category) => category.tasks, {
+        nullable: true,
+        onDelete: 'SET NULL',
+    })
+    @JoinColumn({ name: 'category_id' })
+    category!: TaskCategory | null;
 
-  @Column({
-    name: 'recurrence_type',
-    type: 'enum',
-    enum: TaskRecurrenceType,
-    default: TaskRecurrenceType.WEEKLY,
-  })
-  recurrenceType!: TaskRecurrenceType;
+    @Column({ type: 'varchar', length: 160 })
+    title!: string;
 
-  @Column({
-    name: 'day_of_week',
-    type: 'enum',
-    enum: DayOfWeek,
-    nullable: true,
-  })
-  dayOfWeek!: DayOfWeek | null;
+    @Column({ type: 'text', nullable: true })
+    description!: string | null;
 
-  @Column({ name: 'is_active', type: 'boolean', default: true })
-  isActive!: boolean;
+    @Column({
+        name: 'recurrence_type',
+        type: 'enum',
+        enum: TaskRecurrenceType,
+        default: TaskRecurrenceType.WEEKLY,
+    })
+    recurrenceType!: TaskRecurrenceType;
 
-  @OneToMany(() => TaskRotationMember, (rotationMember) => rotationMember.task)
-  rotationMembers!: TaskRotationMember[];
+    @Column({
+        name: 'day_of_week',
+        type: 'enum',
+        enum: DayOfWeek,
+        nullable: true,
+    })
+    dayOfWeek!: DayOfWeek | null;
 
-  @OneToMany(() => TaskAssignment, (assignment) => assignment.task)
-  assignments!: TaskAssignment[];
+    @Column({ name: 'is_active', type: 'boolean', default: true })
+    isActive!: boolean;
 
-  @CreateDateColumn({ name: 'created_at' })
-  createdAt!: Date;
+    @OneToMany(() => TaskRotationMember, (rotationMember) => rotationMember.task)
+    rotationMembers!: TaskRotationMember[];
 
-  @UpdateDateColumn({ name: 'updated_at' })
-  updatedAt!: Date;
+    @OneToMany(() => TaskAssignment, (assignment) => assignment.task)
+    assignments!: TaskAssignment[];
+
+    @CreateDateColumn({ name: 'created_at' })
+    createdAt!: Date;
+
+    @UpdateDateColumn({ name: 'updated_at' })
+    updatedAt!: Date;
 }

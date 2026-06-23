@@ -1,6 +1,5 @@
-﻿export enum TaskAssignmentStatus {
-  PENDING = 'pending',
-  COMPLETED = 'completed',
-  SKIPPED = 'skipped',
-  EXPIRED = 'expired',
+export enum TaskAssignmentStatus {
+    PENDING = 'pending',
+    COMPLETED = 'completed',
+    SKIPPED = 'skipped',
 }

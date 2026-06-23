@@ -1,13 +1,16 @@
-﻿import { IsOptional, IsString, MaxLength, MinLength } from 'class-validator';
+import { IsOptional, IsString, IsUUID, MaxLength, MinLength } from 'class-validator';
 
 export class CreateTaskCategoryDto {
-  @IsString()
-  @MinLength(2)
-  @MaxLength(120)
-  name!: string;
+    @IsUUID()
+    familyId!: string;
 
-  @IsOptional()
-  @IsString()
-  @MaxLength(1000)
-  description?: string;
+    @IsString()
+    @MinLength(2)
+    @MaxLength(120)
+    name!: string;
+
+    @IsOptional()
+    @IsString()
+    @MaxLength(1000)
+    description?: string;
 }

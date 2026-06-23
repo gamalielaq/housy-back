@@ -3,13 +3,16 @@ import {
     CreateDateColumn,
     Entity,
     Index,
+    JoinColumn,
+    ManyToOne,
     OneToMany,
     PrimaryGeneratedColumn,
     UpdateDateColumn,
 } from 'typeorm';
 import { FamilyMemberRole } from '../../common/enums/family-member-role.enum';
 import { FamilyMemberStatus } from '../../common/enums/family-member-status.enum';
-import { TaskAssignmentLog } from '../../task-assignments/entities/task-assignment-log.entity';
+import { Family } from '../../families/entities/family.entity';
+import { TaskHistory } from '../../task-history/entities/task-history.entity';
 import { TaskAssignment } from '../../task-assignments/entities/task-assignment.entity';
 import { TaskRotationMember } from '../../task-rotations/entities/task-rotation-member.entity';
 
@@ -24,6 +27,13 @@ export class FamilyMember {
 
     @Column({ name: 'family_id', type: 'varchar', length: 36 })
     familyId!: string;
+
+    @ManyToOne(() => Family, (family) => family.members, {
+        nullable: false,
+        onDelete: 'CASCADE',
+    })
+    @JoinColumn({ name: 'family_id' })
+    family!: Family;
 
     @Column({ name: 'display_name', type: 'varchar', length: 120 })
     displayName!: string;
@@ -48,11 +58,11 @@ export class FamilyMember {
     )
     rotationMemberships!: TaskRotationMember[];
 
-    @OneToMany(() => TaskAssignment, (assignment) => assignment.assignedFamilyMember)
+    @OneToMany(() => TaskAssignment, (assignment) => assignment.familyMember)
     assignments!: TaskAssignment[];
 
-    @OneToMany(() => TaskAssignmentLog, (log) => log.changedByFamilyMember)
-    assignmentLogs!: TaskAssignmentLog[];
+    @OneToMany(() => TaskHistory, (log) => log.completedByMember)
+    historyEntries!: TaskHistory[];
 
     @CreateDateColumn({ name: 'created_at' })
     createdAt!: Date;
