@@ -7,16 +7,16 @@ import { Session } from "../modules/sessions/entities/session.entity";
 import { User } from "../modules/users/entities/user.entity";
 
 export const getDatabaseConfig = (
-  configService: ConfigService,
+    configService: ConfigService,
 ): TypeOrmModuleOptions => ({
-  type: "mysql",
-  host: configService.getOrThrow<string>("DB_HOST"),
-  port: Number(configService.getOrThrow<number>("DB_PORT")),
-  username: configService.getOrThrow<string>("DB_USERNAME"),
-  password: configService.get<string>("DB_PASSWORD", ""),
-  database: configService.getOrThrow<string>("DB_DATABASE"),
-  entities: [User, Application, UserApplication, RefreshToken, Session],
-  synchronize: false,
-  logging: configService.get<boolean>("DB_LOGGING", false),
-  migrationsRun: false,
+    type: "mysql",
+    host: configService.getOrThrow<string>("DB_HOST"),
+    port: Number(configService.getOrThrow<number>("DB_PORT")),
+    username: configService.getOrThrow<string>("DB_USERNAME"),
+    password: configService.get<string>("DB_PASSWORD", ""),
+    database: configService.getOrThrow<string>("DB_DATABASE"),
+    entities: [User, Application, UserApplication, RefreshToken, Session],
+    synchronize: false,
+    logging: configService.get<boolean>("DB_LOGGING", false),
+    migrationsRun: false,
 });
