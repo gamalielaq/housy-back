@@ -1,6 +1,7 @@
-import { Module } from "@nestjs/common";
+﻿import { Module } from "@nestjs/common";
 import { JwtModule } from "@nestjs/jwt";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { ApplicationRolesGuard } from "../../common/guards/application-roles.guard";
 import { Application } from "../applications/entities/application.entity";
 import { UserApplication } from "../applications/entities/user-application.entity";
 import { RefreshToken } from "../sessions/entities/refresh-token.entity";
@@ -27,9 +28,16 @@ import { RefreshTokenGeneratorService } from "./refresh-token-generator.service"
   providers: [
     AuthService,
     JwtAuthGuard,
+    ApplicationRolesGuard,
     PasswordHashingService,
     RefreshTokenGeneratorService,
   ],
-  exports: [AuthService, JwtAuthGuard, PasswordHashingService],
+  exports: [
+    AuthService,
+    JwtModule,
+    JwtAuthGuard,
+    ApplicationRolesGuard,
+    PasswordHashingService,
+  ],
 })
 export class AuthModule {}

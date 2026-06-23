@@ -14,4 +14,8 @@ export const envValidationSchema = Joi.object({
   JWT_ACCESS_SECRET: Joi.string().min(32).required(),
   JWT_ACCESS_EXPIRES_IN: Joi.string().default("15m"),
   REFRESH_TOKEN_EXPIRES_DAYS: Joi.number().integer().min(1).default(30),
+  DEFAULT_APP_NAME: Joi.string().default("Identity Web"),
+  DEFAULT_APP_CODE: Joi.string().default("identity"),
+  DEFAULT_APP_CLIENT_ID: Joi.string().default("identity-web"),
+  DEFAULT_APP_CLIENT_SECRET: Joi.string().allow("").optional(),
 });

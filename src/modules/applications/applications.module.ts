@@ -1,13 +1,17 @@
-import { Module } from "@nestjs/common";
+﻿import { Module } from "@nestjs/common";
 import { TypeOrmModule } from "@nestjs/typeorm";
+import { AuthModule } from "../auth/auth.module";
 import { PasswordHashingService } from "../auth/password-hashing.service";
-import { Application } from "./entities/application.entity";
-import { UserApplication } from "./entities/user-application.entity";
 import { ApplicationsController } from "./applications.controller";
 import { ApplicationsService } from "./applications.service";
+import { Application } from "./entities/application.entity";
+import { UserApplication } from "./entities/user-application.entity";
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Application, UserApplication])],
+  imports: [
+    AuthModule,
+    TypeOrmModule.forFeature([Application, UserApplication]),
+  ],
   controllers: [ApplicationsController],
   providers: [ApplicationsService, PasswordHashingService],
   exports: [TypeOrmModule, ApplicationsService],

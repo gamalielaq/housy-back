@@ -1,4 +1,4 @@
-import {
+﻿import {
   Body,
   Controller,
   Get,
@@ -9,13 +9,14 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import type { Request } from "express";
+import { CurrentUser } from "../../common/decorators/current-user.decorator";
 import { AuthService, RequestMetadata } from "./auth.service";
 import { LoginDto } from "./dto/login.dto";
 import { LogoutDto } from "./dto/logout.dto";
 import { RefreshTokenDto } from "./dto/refresh-token.dto";
 import { RegisterDto } from "./dto/register.dto";
 import { JwtAuthGuard } from "./guards/jwt-auth.guard";
-import type { AuthenticatedRequest } from "./guards/jwt-auth.guard";
+import type { AuthJwtPayload } from "./interfaces/auth-jwt-payload.interface";
 
 @Controller("auth")
 export class AuthController {
@@ -62,8 +63,8 @@ export class AuthController {
 
   @Get("me")
   @UseGuards(JwtAuthGuard)
-  me(@Req() request: AuthenticatedRequest) {
-    return this.authService.me(request.user);
+  me(@CurrentUser() user: AuthJwtPayload) {
+    return this.authService.me(user);
   }
 
   private getMetadata(request: Request): RequestMetadata {

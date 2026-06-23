@@ -1,7 +1,20 @@
-import { Controller, Get, Param, ParseUUIDPipe, Post } from "@nestjs/common";
+﻿import {
+  Controller,
+  Get,
+  Param,
+  ParseUUIDPipe,
+  Post,
+  UseGuards,
+} from "@nestjs/common";
+import { ApplicationRoles } from "../../common/decorators/application-roles.decorator";
+import { UserApplicationRole } from "../../common/enums/user-application-role.enum";
+import { ApplicationRolesGuard } from "../../common/guards/application-roles.guard";
+import { JwtAuthGuard } from "../auth/guards/jwt-auth.guard";
 import { SessionsService } from "./sessions.service";
 
 @Controller("sessions")
+@UseGuards(JwtAuthGuard, ApplicationRolesGuard)
+@ApplicationRoles(UserApplicationRole.OWNER, UserApplicationRole.ADMIN)
 export class SessionsController {
   constructor(private readonly sessionsService: SessionsService) {}
 
