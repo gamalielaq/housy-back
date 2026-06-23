@@ -119,7 +119,7 @@ Checklist:
 
 Resultado:
 
-- Base de datos local `family_tasks` creada si no existía.
+- Base de datos local `turnly_db` creada si no existía.
 - Migración inicial generada:
   - `src/database/migrations/1781802374016-InitialSchema.ts`
 - La migración crea:
