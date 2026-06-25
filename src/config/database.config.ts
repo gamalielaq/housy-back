@@ -32,5 +32,6 @@ export const getDatabaseConfig = (
     ],
     synchronize: false,
     logging: configService.get<boolean>('DB_LOGGING', false),
-    migrationsRun: false,
+    migrations: ['dist/database/migrations/*.js'],
+    migrationsRun: true,
 });
